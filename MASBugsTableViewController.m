@@ -8,13 +8,21 @@
 
 #import "MASBugsTableViewController.h"
 
-/// import the ScaryBug Class Header
+// import the ScaryBug Class Header
 #import "ScaryBug.h"
+
+/// import the BugSection class Header
+#import "BugSection.h"
+
 
 @interface MASBugsTableViewController ()
 
-/// Create private property NSArray to hold mutableArray of bugs
-@property (nonatomic, strong) NSArray *bugs;
+// Create private property NSArray to hold mutableArray of bugs from ScaryBug class
+
+/// Change private property to NSMutableArray to hold mutableArray of bugs from BugSection class
+@property (nonatomic, strong) NSMutableArray *bugSections;
+
+
 
 @end
 
@@ -33,8 +41,12 @@
 {
     [super viewDidLoad];
     
-    /// Load the Array with the mutableArray that is returned from calling the ScaryBug Class Method 'bugs'.
-    self.bugs = [ScaryBug bugs];
+    /// mutableArray will now be loaded in the helper method 'setupBugs'
+    // Load the mutableArray with the mutableArray that is returned from calling the ScaryBug Class Method 'bugs'.
+   // self.bugs  = [ScaryBug bugs];
+    
+    /// Call helper method that will put the bugs into sections and load the sections into an Array.
+    [self setupBugs];
 
 }
 
@@ -44,36 +56,92 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - Helper Method
+
+/// Helper Method that will create an array with 5 array objects inside it. Each array object will have a specific section name and will hold the bugs that have that section name. One by one, each bugs will have there section set to the value of their howScary property and then they will be put into the bugSection array, inside the array object that matches the value of the bug's section.
+
+-(void)setupBugs {
+    
+    /// Create Sections
+    self.bugSections = [NSMutableArray arrayWithCapacity:5];
+    
+    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorNotScary]];
+    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorQuiteScary]];
+    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorAverageScary]];
+    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorALittleScary]];
+    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorAiiiiieeeee]];
+
+    
+    /// Sort bugs into Sections
+    
+    /// Create instance of NSMutableArray and set to equal the mutableArray from the ScaryBug Class
+    NSMutableArray *bugs = [ScaryBug bugs];
+    
+    /// Iterate through each bug in the mutableArray
+    for (ScaryBug *bug in bugs) {
+
+        /// Create a section instance for the current bug and set it to the value of the current bug's howScary property.
+        BugSection *section = self.bugSections[(int) bug.howScary];
+        
+        /// Put the bug into the bugs array based on the bug's section.
+        [section.bugs addObject:bug];
+    }
+    
+    
+}
+
+
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    /// Return the number of sections as 1
-    return 1;
+    // Return the number of sections as 1
+    
+    /// Return the count of objects in the bugSections
+    return self.bugSections.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    /// Returing the number of rows based on the the count of items in the bugs array
-    return [self.bugs count];
+    // Returning the number of rows based on the the count of items in the bugs array
+    
+    /// Create instance of BugSection and set to the current bug's section at current indexPath.section
+    BugSection *bugSection = self.bugSections[section];
+
+    /// Return the count of the number of rows for the current bugSection
+    return bugSection.bugs.count;
+}
+
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+    
+    /// Create instance of BugSection and set to the current bug's section at current indexPath.section
+    BugSection *bugSection = self.bugSections[section];
+    
+    /// Call the ScaryBug method, passing the current section. Return the returned string value for the header.
+    return [ScaryBug scaryFactorToString:bugSection.howScary];
 }
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    /// Change the reusableCellWithIdentifier to match the Indetifier that the prototype cell was named in the Storyboard
+    // Change the reusableCellWithIdentifier to match the Indetifier that the prototype cell was named in the Storyboard
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
     
-    /// Create Instance of ScaryBug Class and set it to the current ScaryBug object at the current indexPath's row
-    ScaryBug *currentBug = [self.bugs objectAtIndex:indexPath.row];
+    /// Create instance of BugSection and set to the current bug's section at current indexPath.section
+    BugSection *bugSection = self.bugSections[indexPath.section];
+
+    // Create Instance of ScaryBug Class and set it to the current ScaryBug object at the current indexPath's ro
+     ScaryBug *currentBug = bugSection.bugs[indexPath.row];
     
-    /// Make Cell's textLabel equal to the name of the currentBug a the current indexPath
+    // Make Cell's textLabel equal to the name of the currentBug a the current indexPath
     cell.textLabel.text = currentBug.name;
     
-    /// Make Cell's detailLabel equal to the howScaryString of the currentBug at the current indexPath
+    // Make Cell's detailLabel equal to the howScaryString of the currentBug at the current indexPath
     cell.detailTextLabel.text = currentBug.howScaryString;
     
-    /// Set the Cell's imageView to equal the image of the currentBug at current indexPath
+    // Set the Cell's imageView to equal the image of the currentBug at current indexPath
     cell.imageView.image = currentBug.image;
     
     

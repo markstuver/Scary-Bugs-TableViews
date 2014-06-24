@@ -20,6 +20,7 @@
 		C17CE0471953E519005F1216 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17CE0291953E518005F1216 /* UIKit.framework */; };
 		C17CE04F1953E519005F1216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C17CE04D1953E519005F1216 /* InfoPlist.strings */; };
 		C17CE0511953E519005F1216 /* Scary_BugsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C17CE0501953E519005F1216 /* Scary_BugsTests.m */; };
+		C1A6533D1957C11C00EC7BFB /* BugSection.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A6533C1957C11C00EC7BFB /* BugSection.m */; };
 		C1AE82C319566FD0004740F4 /* MASBugsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1AE82C219566FD0004740F4 /* MASBugsTableViewController.m */; };
 		C1AE82E019567289004740F4 /* attribution.txt in Resources */ = {isa = PBXBuildFile; fileRef = C1AE82C519567289004740F4 /* attribution.txt */; };
 		C1AE82E119567289004740F4 /* bee.jpg in Resources */ = {isa = PBXBuildFile; fileRef = C1AE82C619567289004740F4 /* bee.jpg */; };
@@ -77,6 +78,8 @@
 		C17CE04C1953E519005F1216 /* Scary BugsTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Scary BugsTests-Info.plist"; sourceTree = "<group>"; };
 		C17CE04E1953E519005F1216 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C17CE0501953E519005F1216 /* Scary_BugsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Scary_BugsTests.m; sourceTree = "<group>"; };
+		C1A6533B1957C11C00EC7BFB /* BugSection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BugSection.h; sourceTree = "<group>"; };
+		C1A6533C1957C11C00EC7BFB /* BugSection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BugSection.m; sourceTree = "<group>"; };
 		C1AE82C119566FD0004740F4 /* MASBugsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MASBugsTableViewController.h; path = ../MASBugsTableViewController.h; sourceTree = "<group>"; };
 		C1AE82C219566FD0004740F4 /* MASBugsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MASBugsTableViewController.m; path = ../MASBugsTableViewController.m; sourceTree = "<group>"; };
 		C1AE82C519567289004740F4 /* attribution.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = attribution.txt; sourceTree = "<group>"; };
@@ -167,12 +170,14 @@
 			children = (
 				C1AE82D719567289004740F4 /* ScaryBug.h */,
 				C1AE82D819567289004740F4 /* ScaryBug.m */,
-				C1AE82C419567289004740F4 /* Challenge 1 Resources */,
+				C1A6533B1957C11C00EC7BFB /* BugSection.h */,
+				C1A6533C1957C11C00EC7BFB /* BugSection.m */,
 				C1AE82C119566FD0004740F4 /* MASBugsTableViewController.h */,
 				C1AE82C219566FD0004740F4 /* MASBugsTableViewController.m */,
 				C17CE0341953E518005F1216 /* MASAppDelegate.h */,
 				C17CE0351953E518005F1216 /* MASAppDelegate.m */,
 				C17CE0371953E518005F1216 /* Main.storyboard */,
+				C1AE82C419567289004740F4 /* Challenge 1 Resources */,
 				C17CE03D1953E518005F1216 /* Images.xcassets */,
 				C17CE02C1953E518005F1216 /* Supporting Files */,
 			);
@@ -366,6 +371,7 @@
 				C17CE0361953E518005F1216 /* MASAppDelegate.m in Sources */,
 				C1AE82F219567289004740F4 /* ScaryBug.m in Sources */,
 				C1AE82C319566FD0004740F4 /* MASBugsTableViewController.m in Sources */,
+				C1A6533D1957C11C00EC7BFB /* BugSection.m in Sources */,
 				C17CE0321953E518005F1216 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
