@@ -8,18 +8,18 @@
 
 #import <Foundation/Foundation.h>
 
-/// import ScaryBug header file
+// import ScaryBug header file
 #import "ScaryBug.h"
 
 @interface BugSection : NSObject
 
-/// Create property of ScaryBug class
+// Create property of ScaryBug class
 @property (assign) ScaryFactor howScary;
 
-/// Create property of NSMutableArray called bug
+// Create property of NSMutableArray called bug
 @property (nonatomic, strong) NSMutableArray *bugs;
 
-/// When this is called, it will initialize the instance based on what is passed into it.
+// When this is called, it will initialize the instance based on what is passed into it.
 -(instancetype)initWithHowScary:(ScaryFactor )howScary;
 
 @end

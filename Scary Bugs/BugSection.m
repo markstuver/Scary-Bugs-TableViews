@@ -11,7 +11,7 @@
 @implementation BugSection
 
 
-/// initializer - Sets up initial instance of BugSection
+// initializer - Sets up initial instance of BugSection
 -(instancetype)initWithHowScary:(ScaryFactor )howScary {
     
     if ((self = [super init])) {
