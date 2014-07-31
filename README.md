@@ -2,7 +2,8 @@ Scary-Bugs-TableViews
 =====================
 
 Table View Challenges from Ray Wenderlich Video Tutorials
-    The following are my notes based on the video instructions. Each Challenge Commit will have detailed notes commented throughout the code explaining what I have done for each challenge.
+
+    - The following are my notes based on the video instructions. Each Challenge Commit will have detailed notes commented throughout the code explaining what I have done for each challenge.
 
 Challenge #1: Make a simple table view app that lists the bugs. Images and Model Class are provided.
 
