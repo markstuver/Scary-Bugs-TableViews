@@ -48,9 +48,11 @@
     // Call helper method that will put the bugs into sections and load the sections into an Array.
     [self setupBugs];
     
-    /// Add Edit button to NavBar for Deleting. This is for users who don't know to swipe and delete
+    // Add Edit button to NavBar for Deleting. This is for users who don't know to swipe and delete
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
-
+    
+    /// Turn on allowsSelectionDuringEditing so that the user can select the row to add (not just the little green plus)
+    self.tableView.allowsSelectionDuringEditing = YES;
 }
 
 - (void)didReceiveMemoryWarning
@@ -69,12 +71,11 @@
     self.bugSections = [NSMutableArray arrayWithCapacity:5];
     
     [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorNotScary]];
-    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorQuiteScary]];
-    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorAverageScary]];
     [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorALittleScary]];
+    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorAverageScary]];
+    [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorQuiteScary]];
     [self.bugSections addObject:[[BugSection alloc] initWithHowScary:ScaryFactorAiiiiieeeee]];
 
-    
     // Sort bugs into Sections
     
     // Create instance of NSMutableArray and set to equal the mutableArray from the ScaryBug Class
@@ -89,34 +90,21 @@
         // Put the bug into the bugs array based on the bug's section.
         [section.bugs addObject:bug];
     }
-    
-    
 }
 
 
+#pragma mark - Table view - data source methods
 
-#pragma mark - Table view data source
 
+/** What is the NUMBER OF SECTIONS - TABLEVIEW ***OPTIONAL*** */
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    // Return the number of sections as 1
-    
     // Return the count of objects in the bugSections
     return self.bugSections.count;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    // Returning the number of rows based on the the count of items in the bugs array
-    
-    // Create instance of BugSection and set to the current bug's section at current indexPath.section
-    BugSection *bugSection = self.bugSections[section];
 
-    // Return the count of the number of rows for the current bugSection
-    return bugSection.bugs.count;
-}
-
-
+/** What is the TITLE FOR HEADER IN SECTION - TABLEVIEW ***OPTIONAL*** */
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
     
     // Create instance of BugSection and set to the current bug's section at current indexPath.section
@@ -127,97 +115,220 @@
 }
 
 
+/** What is the NUMBER OF ROWS IN SECTION - TABLEVIEW  ***REQUIRED*** */
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    /// Determine if TableView is in editing mode
+        /// If Editing is ON add 1 .... if not add 0
+    int adjustment = [self isEditing] ? 1 : 0;
+    
+    // Returning the number of rows based on the the count of items in the bugs array
+    // Create instance of BugSection and set to the current bug's section at current indexPath.section
+    BugSection *bugSection = self.bugSections[section];
+
+    // Return the count of the number of rows for the current bugSection
+        /// Add value of adjustment to the row count (if Editing is on add 1... if not add 0)
+    int returnAmountOfRows = bugSection.bugs.count + adjustment;
+    return  returnAmountOfRows;
+}
+
+
+/** Configure the CELL FOR ROW AT INDEX PATH - TABLEVIEW  ***REQUIRED*** */
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Change the reusableCellWithIdentifier to match the Indetifier that the prototype cell was named in the Storyboard
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"BugCell" forIndexPath:indexPath];
     
     // Create instance of BugSection and set to the current bug's section at current indexPath.section
     BugSection *bugSection = self.bugSections[indexPath.section];
 
-    // Create Instance of ScaryBug Class and set it to the current ScaryBug object at the current indexPath's ro
-     ScaryBug *currentBug = bugSection.bugs[indexPath.row];
+    /// Check to see if indexPath.row is greater or equal to the count of the bugSection.bugs and is the TableView in editing mode
+    if (indexPath.row >= bugSection.bugs.count && [self isEditing]) {
+        /// if valid... Setup new cell
+        cell.textLabel.text = @"Add Bug";
+        cell.detailTextLabel.text = nil;
+        cell.imageView.image = nil;
+        
+    } else {
+    /// else... load cell with existing bugs from array
+
+        // Create Instance of ScaryBug Class and set it to the current ScaryBug object at the current indexPath's ro
+        ScaryBug *currentBug = bugSection.bugs[indexPath.row];
+        
+        // Make Cell's textLabel equal to the name of the currentBug a the current indexPath
+        cell.textLabel.text = currentBug.name;
     
-    // Make Cell's textLabel equal to the name of the currentBug a the current indexPath
-    cell.textLabel.text = currentBug.name;
+        // Make Cell's detailLabel equal to the howScaryString of the currentBug at the current indexPath
+        cell.detailTextLabel.text = currentBug.howScaryString;
     
-    // Make Cell's detailLabel equal to the howScaryString of the currentBug at the current indexPath
-    cell.detailTextLabel.text = currentBug.howScaryString;
-    
-    // Set the Cell's imageView to equal the image of the currentBug at current indexPath
-    cell.imageView.image = currentBug.image;
-    
+        // Set the Cell's imageView to equal the image of the currentBug at current indexPath
+        cell.imageView.image = currentBug.image;
+    }
     
     return cell;
 }
 
 
-#pragma mark - Table view delegate
+#pragma mark - Table view - delegate methods
 
-/// Delegate Method for CommitingEditingStyle - Setting to delete rows
+/** For COMMIT EDITING STYLE FOR ROW - TABLEVIEW - ***REQUIRED FOR EDITING MODE*** **/
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    /// Make sure we are grabing the EditingStyleDELETE
+// DELETING ROWS
+    // Make sure we are grabbing the EditingStyleDELETE
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         
-        /// Create instance of BugSection and set to current bug section
+        // Create instance of BugSection and set to current bug section
         BugSection *section = self.bugSections[indexPath.section];
         
-        /// Remove the current row from the Array
+        // Remove the current row from the Array
         [section.bugs removeObjectAtIndex:indexPath.row];
         
-        /// Delete the current row with animation.
+        // Delete the current row with animation.
         [tableView deleteRowsAtIndexPaths:@[indexPath]
                          withRowAnimation:UITableViewRowAnimationAutomatic];
-         
-    }
-    
-    
-}
-
-
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+/// INSERTING ROWS
+    /// Make sure we are grabbing the EditingStyleINSERT
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+        
+        /// Create instance of BugSection and set to the current section
+        BugSection *section = self.bugSections[indexPath.section];
+        
+        /// Create instance of the bug and use the class initializer
+            /// for howScary: set to match the current sections scare factor
+        ScaryBug *newBug = [[ScaryBug alloc] initWithName:@"New Data" image:nil howScary:section.howScary];
+        
+        /// Add new row object to the array
+        [section.bugs addObject:newBug];
+        
+        /// Animate the row and insert
+        [tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+    }
 }
-*/
 
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
+
+/** Tell TableView SET EDITING: ANIMATED: - TABLEVIEW - **Tells TableView what you want to change**  **/
+
+-(void)setEditing:(BOOL)editing animated:(BOOL)animated {
+    
+    /// Call super class to overide
+    [super setEditing:editing animated:animated];
+    
+    /// If entering Editing mode - add placeholder "add new" row
+    if (editing) {
+        
+        /// When adding or removing a bunch of rows from tableView it is good practice to use beginUpdates/endUpdates
+        [self.tableView beginUpdates];
+        
+        /// iterate through array of sections to add a new row for every section
+        for (int i = 0 ; i < _bugSections.count; ++i) {
+            
+        /// Create instance of BugSection and set to current bugSection
+           BugSection *section = _bugSections[i];
+           
+        /// Call method on tableView to notfiy that a new row is being insterted
+           [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:section.bugs.count inSection:i]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
+        
+        /// Calling endUpdates on TableView
+        [self.tableView endUpdates];
+        
+    /// Else - when exiting editing mode - remove placeholder "add new" rows
+    }else {
+        
+        [self.tableView beginUpdates];
+        
+        /// iterate through array of sections to remove the "add new" row in every section
+        for (int i=0; i <_bugSections.count; ++i) {
+            
+            /// Create instance of BugSection and set to current bugSection
+            BugSection *section = _bugSections[i];
+            
+            /// Call method on tableView to notfiy that a the "add new" row is being deleted
+            [self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:section.bugs.count inSection:i]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
+        
+        /// Calling endUpdates on TableView
+        [self.tableView endUpdates];
+    }
 }
-*/
 
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
+
+/** Set EDITING STYLE FOR ROW AT INDEXPATH - TableView **To show a green plus in row for user to add row** **/
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    ///Create instance of BugSection and set to current bugSection
+    BugSection *section = self.bugSections[indexPath.section];
+    
+    ///If Row is greater or equal to the count of the bugSections array
+    if (indexPath.row >= section.bugs.count) {
+        /// Show style/plus icon for inserting row
+        return UITableViewCellEditingStyleInsert;
+    } else {
+        /// else - show style/negative icon for deleting row
+        return UITableViewCellEditingStyleDelete;
+    }
 }
-*/
 
-/*
+
+/** Call - WILL SELECT ROW AT INDEXPATH - TableView ** To make sure that only the "add row" is able to be selected.
+                                    If any other cell is selected, a nil will be returned not letting the user select the row. **/
+-(NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    /// Create instance of BugSection and set to current section
+    BugSection *section = self.bugSections[indexPath.section];
+    
+    /// if Editing is on and current row is less then the count of rows in section... return nil
+    if ([self isEditing] && indexPath.row < section.bugs.count) {
+        
+        return  nil;
+    
+    /// else... return indexPath
+    } else {
+        return indexPath;
+    }
+}
+
+/** Call - DID SELECT ROW AT INDEXPATH - TableView ** Is called when row was tapped. Here we are telling the tableView
+                                        to insert a new row when the "add new" row is tapped. **/
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    /// Remove the highlight row feature
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    /// Create instance of BugSection and set to current section
+    BugSection *section = self.bugSections[indexPath.section];
+    
+    /// if editing is on and indexPath.row is greater or equal to the count of rows in section...
+    if (indexPath.row >= section.bugs.count && [self isEditing]) {
+        
+        /// ... call commitEditingStyle and set to ... editingStyleInsert
+        [self tableView: tableView commitEditingStyle:UITableViewCellEditingStyleInsert forRowAtIndexPath:indexPath];
+    }
+}
+
+
+
 #pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
+/** Set SHOULD PREFORM SEQUE WITH IDENTIFIER - ** override method so that the segue does not take control when "add new" row is tapped **/
+
+-(BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender {
+    
+    /// Check to make sure we have the correct segue
+    /// if the segue identifier is correct and the tableView is in Editing mode...
+    if ([identifier isEqualToString:@"ToDetail"] && [self isEditing]) {
+        /// ... Return No - dont segue to the detail view
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
+
+
+/* // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     // Get the new view controller using [segue destinationViewController].
