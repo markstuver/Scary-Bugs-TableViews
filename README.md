@@ -300,5 +300,337 @@ Challenge #4: Insert Rows - Adding a new row at the end of each section
                                     forRowAtIndexPath: indexPath];
                             }
 
+Challenge #5 - Move Rows
 
 
+2 Ways to rearrange cells in a TableView
+
+	• Via Built-in UI - (Apple Method)
+		* Tap Edit button and three line icon appear to right of cell that can be tapped and dragged around.
+
+			Can get built-in UI with edit button
+				Just implement two methods:
+
+					• tableView:canMoveRowAtIndexPath:
+						* allows us to decide which rows will have the 3 line icon and can be moved (wont want 'add new' row to be movable)
+
+					• tableView:moveRowAtIndexPath:toIndexPath:
+						* Called when a row is moved, it tells the tableView where the row is being moved to so that the tableView can move row currently at the destination.
+
+	• Via Long Press - (Non Built-in way)
+		• Without entering Edit mode, user does a long press on a row and then it becomes active and can be moved around.
+
+			Upon long press of row:
+		
+				* Take snapshot of the row - the current state of the row
+				* White out cell - so it looks blank and doesn't distract the user
+				* Make new view baed on the snapshot
+			
+			Upon finger move:
+			
+				* Move old cell -> cell underneath finger
+					• rearranging and moving cells as the old cell is being moved in the tableView
+				
+			Upon finger lift:
+
+				* Restore old cell - remove white out
+				* Remove snapshot view
+
+	**Gesture Recognizer Quick Start
+		A recognizer can look for different gestures: a tap, double tap, swipe, pan, rotation, a pinch... etc. They all work in similar ways.
+
+		* Create and add to view (with callback)
+				• Based on the type of gesture you are looking for. Initialize with a target and selector. In other words a Class and a Method to call back when the gesture is detected.
+			UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] 
+				initWithTarget: self action: @selector(longPressGestureRecognized:)];
+
+				• Then call the addGestureRecognizer method on the view that you want to watch for the gestures, passing the GestureRecognizer into the method.
+			[self.tableView addGestureRecognizer:longPress];
+
+		* Get the current location of the touch in the view
+				• The gesture recognizer calls the locationInView: method and passes its view as a parameter. This will give the location inside the view where the tap is.
+			CGPoint location = [longPress locationInView: self.tableView];
+			NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:location];
+
+		* Different states: Began, Changed, Cancelled, Done
+
+
+Implementing Moving Rows:
+
+1. Via Built-in UI
+
+	1. Call method: tableView:canMoveRowAtIndexPath: to tell the TableView which rows can move.
+		ie: tableView:canMoveRowAtIndexPath: {
+
+			• Create instance of DataSets and set to the current section
+			DataSet *dataSet = self.dataSets[indexPath.section];
+
+			• If Statement - if the row is greater or equal to the count of icons in the array and the tableView is in editing mode...
+			if (indexPath.row >= dataSet.icons.count && [self isEditing]) {
+
+			• ... return NO so that that row will not be movable
+			  return NO; }
+
+			• else - return yes - let the row move
+			else { return YES; }}
+
+	2. Call method: tableView:moveRowAtIndexPath:toIndexPath: to tell TableView where the row is going.
+		
+		ie: tableView:moveRowAtIndexPath:toIndexPath: {
+
+			• Create instance of DataSet and set to the dataSet at the source row (row that will be moved)
+			DataSet *sourceSet = self.dataSets[sourceIndexPath.section];
+
+			• Create instance of DataSet and set to the dataSet at the destination row (row that the cell is being moved to).
+			DataSet *destSet = self.dataSets[destinationIndexPath.section];
+
+			•Create instance of Data and set to the data at the source row
+			Data *dataToMove = sourceSet.data[sourceIndexPath.row];
+
+			• Check to see if the source dataSet equals the destination dataSet
+			if (sourceSet == destSet) {
+			
+				• If the source and destination dataSets are the same, we will just be moving the data around in the same array using a mutableArray method.
+				[destSet.icons exchangeObjectAtIndex: destinationIndexPath.row withObjectAtIndex: sourceIndexPath.row]; }
+
+			•else - they are not the same we will be moving the data from one array to another array.
+			else {
+
+				• Add data to the destinationSet array
+				 [destSet.icons insertObject:dataToMove atIndex: destinationIndexPath.row];
+				
+				• Remove the data from the sourceSet array
+				[sourceSet.icons removeObjectAtIndex:sourceIndexPath.row];
+				}
+		
+	3. To keep a row from being moved to the bottom row of the section, override using tableView:targetIndexPathForMoveFromRowAtIndexPath:toProposedIndexPath: - this is called before the row is moved to check and make sure that the proposed indexPath row that the data is being moved is allowed to move there.
+
+		ie: -targetIndexPathForMoveFromRowAtIndexPath:toProposedIndexPath: {
+
+			• Create instance of DataSet and set to the proposed destination IndexPath.section
+			DataSet *set = self.dataSets[proposedDestinationIndexPath.section]};
+
+			• if proposed row is greater or equal to the count of the data array, then we know that the user is trying to put the data in row that it can not go.
+			if (proposedDestinationIndexPath.row >= data.icons.count {
+
+				• Instead of letting the user put the row where it is not allowed, return the row right before it
+				return [NSIndexPath indexPathForRow:set.icons.count-1 inSection:proposedDestinationIndexPath.section]; }
+
+			• else - allow row to go to the propose destination
+			else { return proposedDestionationIndexPath;}}
+			
+
+	
+2. Via Long Press -  Code
+
+	1. In viewDidLoad:
+
+		* Add the longPress gesture recognizer.
+				UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] 
+				initWithTarget: self action: @selector(longPressGestureRecognized:)];
+
+		* Call the addGestureRecognizer method on the tableView.
+			[self.tableView addGestureRecognizer:longPress];
+
+	2. Implement the method that was passed into the gesture recognizer.
+		-(IBAction) longPressGestureRecognized: (UILongGestureRecognizer *)longPress {
+
+				• Get the indexPath from the current location of the gesture 
+					CGPoint location = [longPress locationInView: self.tableView];
+					NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:location];
+
+				• Get current state of the gesture recognizer
+					UIGestureRecognizerState state = longpress.state;
+
+				• Create 2 static variables - static means almost global variables. Will stick around across times when the method is called.
+
+					1) One will be used to keep track of the snap shot.
+						static UIView *snapshot = nil;
+			
+					2) One will be keep track of the indexPath we are moving (source)
+						static NSIndexPath *sourceIndexPath = nil;
+
+				• Use Switch Function to switch on the gesture recognizer
+						switch (state) {
+						
+						• if (state) is ....StateBegan...
+							case UIGestureRecognizerStateBegan: {
+						
+							• check to make sure we have an indexPath at all (it is possible that the 
+								user did a longPress somewhere in the tableView but not on a row)	
+							if (indexPath) {
+			
+								• set sourceIndexPath variable to the current indexPath
+									sourceIndexPath = indexPath;
+
+								• Look up cell that we are going to use
+									UITableViewCell *cell = [self.tableView 
+										cellForRowAtIndexPath:indexPath];
+							
+								**SEE STEP 3 BELOW FOR SETTING UP HELPER METHOD					
+		
+								• Set snapshot variable equal to the view that is returned when calling the helper method. (we are passing in the current cell to the helper method to be customized and have a snapshot view created)
+									snapshot = [self customSnapshotFromView:cell];
+
+
+								• Create a block variable to be used in the animation method.
+									_block CGPoint center = cell.center;
+			
+								• Set snapshot properties to prepare for animating as it added as a subview.
+									• set the snapshot center equal to the current cell's center
+										snapshot.center = cell.center;
+
+									• set the opacity of the snapshot to 0 so we can fade it into the subview.
+										snapshot.alpha = 0;
+
+								• Add as a subview of the tableView
+									[self.tableView addSubview:snapshot];
+
+								• Fade in the new snapshot while fading out the cell using animation
+									[UIView animateWithDuration:0.25 animations:^{
+
+									
+									*Setting parameters that will be used when animating
+									• set block variable's y location equal to location of the user's touch								
+										center.y = location.y;
+
+									• set snapshot's center equal to the block variable's center
+										snapshot.center = center;
+
+									• apply a scale transformation to the snapshot making it lightly bigger when it is moved by the user.
+										snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05);
+
+									• set snapshot's alpha to almost 100% opaque.
+										snapshot.alpha = 0.98;
+
+									* while snapshot is animating, the old cell will be whited out.
+										
+										• Change background to white
+											[cell.backgroundColor = [UIColor whiteColor];
+			
+										• Change textLabel, detailTextLabel and imageView's opacity to 0.
+											cell.textLabel.alpha = 0;
+											cell.detailTextLabel.alpha = 0;
+											cell.imageView.alpha = 0;
+								}
+				}
+				break;
+				
+					• if (state) is ....StateChanged...
+						case UIGestureRecognizerStateChanged: {
+
+						• Store the old center, 
+							CGPoint center = snapshot.center;
+
+						• update the y to current touch position
+							center.y = location.y	
+							
+						• set the center to the current center position	
+							snapshot.center = center;
+
+				Juggle the rows around, rearrange rows when the selected row is moved.
+						• Create instance of DataSet and set it to the indexPath.section using the objectAtIndex: method on the dataSets array.
+							DataSet *destSet = [self.dataSets objectAtIndex:indexPath.section];
+
+						• Check if indexPath is valid and that make sure it is not equal to the source and that the user is not trying to move below the row at the bottom that it is not allowed to move to.
+							if(indexPath && ![indexPath isEqual:sourceIndexPath] && indexPath.row < destSet.icons.count) {
+
+
+						• Create instance of DataSet and set to the dataSet at the source row (row that will be moved)
+			DataSet *sourceSet = self.dataSets[sourceIndexPath.section];
+
+			• Create instance of DataSet and set to the dataSet at the destination row (row that the cell is being moved to).
+			DataSet *destSet = self.dataSets[indexPath.section];
+
+			•Create instance of Data and set to the data at the source row
+			Data *dataToMove = sourceSet.data[sourceIndexPath.row];
+
+			• Check to see if the source dataSet equals the destination dataSet
+			if {sourceSet == destSet) {
+			
+				• If the source and destination dataSets are the same, we will just be moving the data around in the same array using a mutableArray method.
+				[destSet.icons exchangeObjectAtIndex: indexPath.row withObjectAtIndex: sourceIndexPath.row]; }
+
+			•else - they are not the same we will be moving the data from one array to another array.
+			else {
+
+				• Add data to the destinationSet array
+				 [destSet.icons insertObject:dataToMove atIndex: indexPath.row];
+				
+				• Remove the data from the sourceSet array
+				[sourceSet.icons removeObjectAtIndex:sourceIndexPath.row];
+				}
+
+			• Tell TableView that something has been moved
+				[self.tableView moveRowAtIndexPath:sourceIndexPath toIndexPath:indexPath];
+
+			• update the source indexPath to the indexPath
+				sourceIndexPath = indexPath;
+				} 
+			break;
+			default: {
+
+			• Create instance of UITableViewCell and set to the source IndexPath
+			UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:sourceIndexPath];
+			[UIView animateWithDuration:0.35 animation:^{
+
+			• Get rid of snapshot and move it out of the way - with animation
+				• center snapshot to the center of the cell
+					snapshot.center = cell.center;
+
+				• scale the snapshot back to normal size
+					snapshot.transform = CGAffineTransformMakeScale(1.0, 10);
+
+				• fade the opacity of the snapshot to 0
+					snapshot.alpha = 0.0;
+
+			• Restore original cell's content
+				• background color
+					cell.backgroundColor = [UIColor whiteColor];
+
+				• set opacity of the text label, detail label and imageView to 1
+					cell.textLabel.alpha = 1;
+					cell.detailTextLabel.alpha = 1;
+					cell.imageView.alpha = 1;
+
+
+			}	
+				• Call animation with duration's completion method to remove the snapshot from the view.
+				 	completion:^(BOOL finished) {
+					[snapshot removeFromSuperview];
+					snapshot = nil;	
+				
+				];
+				
+				• Set the source indexPath to nil
+				sourceIndexPath = nil;
+		}
+
+		break;
+}
+}
+
+	3. Create Helper Method for taking snapshot of the selected row
+		-(UIView *)customSnapshotFromView:(UIView *)inputView  {
+			
+			• Call new apple method that will take snapshot view after screen updates
+				UIView *snapshot = [inputView snapshotViewAfterScreenUpdate:YES];
+
+			• Configure UIView using it's CALayer  (CALayer has several handy properties)
+
+			• Do not what to clip to the layer bounds
+				snapshot.layer.masksToBounds = NO;
+			• Set corner radius of view to 0.0 (no radius)
+				snapshot.layer.cornerRadius = 0.0;
+
+			• Set shadow offset - this will make the cell look a little different as while the user is longPressing and moving the row. (-5.0 on x axis and 0 on y axis)
+				snapshot.layer.shadowOffset = CGSizeMake(-5.0, 0);
+
+			• Set shadow radius - this will add to the shadow effect.
+				snapshot.layer.shadowRadius = 5.0;
+				
+			• Set shadow Opacity - this will also add to the shadow effect.
+				snapshot.layer.shadowOpacity = 0.4;
+
+				return snapshot;
+				}
