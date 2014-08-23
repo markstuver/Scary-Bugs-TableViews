@@ -14,6 +14,9 @@
 // import the BugSection class Header
 #import "BugSection.h"
 
+/// import the BugCell for the customCell
+#import "MASBugCell.h"
+
 
 @interface MASBugsTableViewController ()
 
@@ -114,6 +117,25 @@
     return [ScaryBug scaryFactorToString:bugSection.howScary];
 }
 
+/// Call Method to set the height of the current row
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    /// Create instance of BugSection and set to the current indexPath section
+    BugSection *bugSection = self.bugSections[indexPath.section];
+    
+    /// Determine what kind of prototype cell the current row is
+    if (indexPath.row >= bugSection.bugs.count && [self isEditing]) {
+        
+        /// New Bug Row
+        return 40;
+        
+    } else {
+        
+        /// exsisting Bug Row
+        return 80;
+    }
+}
+
 
 /* What is the NUMBER OF ROWS IN SECTION - TABLEVIEW  ***REQUIRED*** */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -135,36 +157,62 @@
 /* Configure the CELL FOR ROW AT INDEX PATH - TABLEVIEW  ***REQUIRED*** */
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Change the reusableCellWithIdentifier to match the Indetifier that the prototype cell was named in the Storyboard
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"BugCell" forIndexPath:indexPath];
     
-    // Create instance of BugSection and set to the current bug's section at current indexPath.section
+    /// Set UITableViewCell equal to nil
+    UITableViewCell *cell = nil;
+    
+//    /// Create instance of BugSection class and set it to the current section of the indexPath
+//    BugSection *bug = self.bugSections[indexPath.section];
+    
+    /// Create instance of BugSection and set to the current bug's section at current indexPath.section
     BugSection *bugSection = self.bugSections[indexPath.section];
 
-    // Check to see if indexPath.row is greater or equal to the count of the bugSection.bugs and is the TableView in editing mode
+    /// DETERMINE WHICH PROTOTYPE CELL TO USE
+    /// Create if/else to determine if the current indexPath row is greater/equal to the count of bugSection
     if (indexPath.row >= bugSection.bugs.count && [self isEditing]) {
+        
+    // Change the reusableCellWithIdentifier to match the Indetifier that the prototype cell was named in the Storyboard
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"NewBugCell" forIndexPath:indexPath];
+   
+//    // Check to see if indexPath.row is greater or equal to the count of the bugSection.bugs and is the TableView in editing mode
+//    if (indexPath.row >= bugSection.bugs.count && [self isEditing]) {
         // if valid... Setup new cell
         cell.textLabel.text = @"Add Bug";
         cell.detailTextLabel.text = nil;
         cell.imageView.image = nil;
         
+        return cell;
+        
     } else {
-    // else... load cell with existing bugs from array
-
-        // Create Instance of ScaryBug Class and set it to the current ScaryBug object at the current indexPath's ro
+        
+        /// Make sure that the cellIdentifier is what we want
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"BugCell" forIndexPath:indexPath];
+        
+        /// Create instance of MASBugCell and cast it as a MASBugCell
+        MASBugCell *bugCell = (MASBugCell *)cell;
+        
+        /// Create Instance of ScaryBug Class and set it to the current ScaryBug object at the current indexPath's row
         ScaryBug *currentBug = bugSection.bugs[indexPath.row];
         
-        // Make Cell's textLabel equal to the name of the currentBug a the current indexPath
-        cell.textLabel.text = currentBug.name;
+        /// Create Instance of NSString and set it equal to the howScaryString of the current row
+        NSString *howScaryIsIt = currentBug.howScaryString;
+
+        /// Set Label and Image of current bug.
+        bugCell.bugLabel.text = currentBug.name;
+        bugCell.bugImage.image = currentBug.image;
+
+        /// If the currentBug's ScareFactor is equal to Aiiiieeeee or QuiteScary...
+        if ([howScaryIsIt isEqualToString: [ScaryBug scaryFactorToString:ScaryFactorAiiiiieeeee]] || [howScaryIsIt isEqualToString: [ScaryBug scaryFactorToString:ScaryFactorQuiteScary]]) {
     
-        // Make Cell's detailLabel equal to the howScaryString of the currentBug at the current indexPath
-        cell.detailTextLabel.text = currentBug.howScaryString;
-    
-        // Set the Cell's imageView to equal the image of the currentBug at current indexPath
-        cell.imageView.image = currentBug.image;
-    }
-    
+            /// ... Use this image
+            bugCell.favoriteBug.image = [UIImage imageNamed:@"shockedface2_full.png"];
+            
+        } else {
+            /// else... use this image
+            bugCell.favoriteBug.image = [UIImage imageNamed:@"shockedface2_empty"];
+        }
     return cell;
+    }
 }
 
 
@@ -307,64 +355,64 @@
     }
 }
 
-/** CAN MOVE ROW AT INDEX PATH - To tell the tableView which rows can/cannot move. **/
+/* CAN MOVE ROW AT INDEX PATH - To tell the tableView which rows can/cannot move. */
 -(BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    ///Create instance of BugSections and set to current section
+    //Create instance of BugSections and set to current section
     BugSection *bugSection = self.bugSections[indexPath.section];
     
-        /// if the row is greater or equal to the count of bugs in the array and the tableView is in editing mode...
+        // if the row is greater or equal to the count of bugs in the array and the tableView is in editing mode...
     if (indexPath.row >= bugSection.bugs.count && [self isEditing]) {
-        /// return No so that row is not movable
+        // return No so that row is not movable
         return NO;
     }
-        /// else return YES
+        // else return YES
     return YES;
 }
 
-/** MOVE ROW AT INDEX PATH - To tell the tableView where the row is going **/
+/* MOVE ROW AT INDEX PATH - To tell the tableView where the row is going **/
 -(void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath {
     
-    ///Create instance of BugSection and set the bugSection to the source row
+    //Create instance of BugSection and set the bugSection to the source row
     BugSection *sourceSection = self.bugSections[sourceIndexPath.section];
     
-    ///Create instance of BugSection and set to the bugSection at the destination row
+    //Create instance of BugSection and set to the bugSection at the destination row
     BugSection *destSection = self.bugSections[destinationIndexPath.section];
     
-    ///Create instance of SacryBug and set to the bug at the source row
+    //Create instance of SacryBug and set to the bug at the source row
     ScaryBug *bugToMove = sourceSection.bugs[sourceIndexPath.row];
     
-    ///Check to see if the source bugSection equals the destination bugSection
+    //Check to see if the source bugSection equals the destination bugSection
     if (sourceSection == destSection) {
         
-        ///If equal... will just be moving the bug around in the same array using mutableArray method
+        //If equal... will just be moving the bug around in the same array using mutableArray method
         [destSection.bugs exchangeObjectAtIndex:destinationIndexPath.row withObjectAtIndex:sourceIndexPath.row];
     }
     
-    /// else... they are not the same so the bug will be moved from one array to another array
+    // else... they are not the same so the bug will be moved from one array to another array
     else {
-        ///Add bug to the destinationSection array
+        //Add bug to the destinationSection array
         [destSection.bugs insertObject:bugToMove atIndex:destinationIndexPath.row];
         
-        ///Remove the bug from the sourceSection
+        //Remove the bug from the sourceSection
         [sourceSection.bugs removeObjectAtIndex:sourceIndexPath.row];
     }
 }
 
-/** TARGET INDEXPATH FROM ROW AT INDEXPATH TO PROPOSEDINDEXPATH - This will keep the user from moving a row to the bottom row of the section.**/
+/* TARGET INDEXPATH FROM ROW AT INDEXPATH TO PROPOSEDINDEXPATH - This will keep the user from moving a row to the bottom row of the section.**/
 -(NSIndexPath *)tableView:(UITableView *)tableView targetIndexPathForMoveFromRowAtIndexPath:(NSIndexPath *)sourceIndexPath toProposedIndexPath:(NSIndexPath *)proposedDestinationIndexPath {
     
-    ///Create instance of BugSection and set to the proposed destination
+    //Create instance of BugSection and set to the proposed destination
     BugSection *section = self.bugSections[proposedDestinationIndexPath.section];
     
-    ///If proposed row is greater or equal to the count of the bugs array...
+    //If proposed row is greater or equal to the count of the bugs array...
     if (proposedDestinationIndexPath.row >= section.bugs.count) {
         
-        ///...instead of letting the user put the row where it is not allowed, return the row right before it.
+        //...instead of letting the user put the row where it is not allowed, return the row right before it.
         return [NSIndexPath indexPathForRow:section.bugs.count-1 inSection:proposedDestinationIndexPath.section];
     }
     
-    ///else... allow row to go to the proposed destination
+    //else... allow row to go to the proposed destination
     else {
         return proposedDestinationIndexPath;
     }

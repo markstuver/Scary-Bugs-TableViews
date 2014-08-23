@@ -20,7 +20,7 @@
 }
 
 - (NSString *)howScaryString {
-  return [ScaryBug scaryFactorToString:self.howScary];
+  return [ScaryBug scaryFactorToString:(self.howScary)];
 }
 
 + (NSString *)scaryFactorToString:(ScaryFactor)scaryFactor {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9A9F714D19A13AF2007287A9 /* MASBugCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9A9F714C19A13AF2007287A9 /* MASBugCell.m */; };
 		C17CE0261953E518005F1216 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17CE0251953E518005F1216 /* Foundation.framework */; };
 		C17CE0281953E518005F1216 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17CE0271953E518005F1216 /* CoreGraphics.framework */; };
 		C17CE02A1953E518005F1216 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17CE0291953E518005F1216 /* UIKit.framework */; };
@@ -61,6 +62,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9A9F714B19A13AF2007287A9 /* MASBugCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MASBugCell.h; sourceTree = "<group>"; };
+		9A9F714C19A13AF2007287A9 /* MASBugCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MASBugCell.m; sourceTree = "<group>"; };
 		C17CE0221953E518005F1216 /* Scary Bugs.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Scary Bugs.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C17CE0251953E518005F1216 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C17CE0271953E518005F1216 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -172,6 +175,8 @@
 				C1AE82D819567289004740F4 /* ScaryBug.m */,
 				C1A6533B1957C11C00EC7BFB /* BugSection.h */,
 				C1A6533C1957C11C00EC7BFB /* BugSection.m */,
+				9A9F714B19A13AF2007287A9 /* MASBugCell.h */,
+				9A9F714C19A13AF2007287A9 /* MASBugCell.m */,
 				C1AE82C119566FD0004740F4 /* MASBugsTableViewController.h */,
 				C1AE82C219566FD0004740F4 /* MASBugsTableViewController.m */,
 				C17CE0341953E518005F1216 /* MASAppDelegate.h */,
@@ -370,6 +375,7 @@
 			files = (
 				C17CE0361953E518005F1216 /* MASAppDelegate.m in Sources */,
 				C1AE82F219567289004740F4 /* ScaryBug.m in Sources */,
+				9A9F714D19A13AF2007287A9 /* MASBugCell.m in Sources */,
 				C1AE82C319566FD0004740F4 /* MASBugsTableViewController.m in Sources */,
 				C1A6533D1957C11C00EC7BFB /* BugSection.m in Sources */,
 				C17CE0321953E518005F1216 /* main.m in Sources */,
